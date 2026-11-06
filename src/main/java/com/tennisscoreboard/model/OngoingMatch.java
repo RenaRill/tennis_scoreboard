@@ -4,6 +4,7 @@ import com.tennisscoreboard.exception.InvalidValueException;
 import lombok.Getter;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Getter
 public class OngoingMatch {
@@ -14,7 +15,6 @@ public class OngoingMatch {
 
     private final PlayerScore firstPlayerScore;
     private final PlayerScore secondPlayerScore;
-    private String winnerName;
 
     public OngoingMatch(String firstPlayerName, String secondPlayerName) {
         this.firstPlayerScore = new PlayerScore(firstPlayerName);
@@ -27,6 +27,15 @@ public class OngoingMatch {
 
     public String getSecondPlayerName() {
         return secondPlayerScore.getName();
+    }
+
+    public Optional<String> getWinnerName() {
+        if (firstPlayerScore.getSetScore() == SETS_TO_WIN) {
+            return Optional.of(firstPlayerScore.getName());
+        } else if (secondPlayerScore.getSetScore() == SETS_TO_WIN) {
+            return Optional.of(secondPlayerScore.getName());
+        }
+        return Optional.empty();
     }
 
     public void addPoint(String name) {
@@ -64,15 +73,11 @@ public class OngoingMatch {
     }
 
     public void addSet(PlayerScore player) {
-        int playerSets = player.addAndGetSet();
+        player.addAndGetSet();
         PlayerScore opponent = findOpponent(player);
 
         player.resetGames();
         opponent.resetGames();
-
-        if (playerSets == SETS_TO_WIN) {
-            this.winnerName = player.getName();
-        }
     }
 
     public void addTieBreakPoint(PlayerScore player) {
@@ -89,7 +94,7 @@ public class OngoingMatch {
     }
 
     public boolean isCompleted() {
-        return getWinnerName() != null;
+        return getWinnerName().isPresent();
     }
 
     public PlayerScore getPlayerScore(String name) {

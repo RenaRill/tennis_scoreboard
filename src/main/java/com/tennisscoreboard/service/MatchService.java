@@ -55,13 +55,15 @@ public class MatchService {
         if (!match.isCompleted()) {
             match.addPoint(name);
 
-            if (match.getWinnerName() != null) {
+            String winnerName = match.getWinnerName().orElse(null);
+            if (winnerName != null) {
                 matchDAO.saveMatch(
                         createOrGetPlayer(match.getFirstPlayerName()),
                         createOrGetPlayer(match.getSecondPlayerName()),
-                        createOrGetPlayer(match.getWinnerName())
+                        createOrGetPlayer(winnerName)
                 );
             }
+
         }
         return match;
     }

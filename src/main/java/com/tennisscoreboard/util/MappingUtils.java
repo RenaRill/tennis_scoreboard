@@ -49,7 +49,7 @@ public class MappingUtils {
         return new GetOngoingMatchResponseDTO(
                 toPlayerScoreDTO(ongoingMatch.getFirstPlayerScore()),
                 toPlayerScoreDTO(ongoingMatch.getSecondPlayerScore()),
-                ongoingMatch.getWinnerName()
+                ongoingMatch.getWinnerName().orElse(null)
         );
     }
 
