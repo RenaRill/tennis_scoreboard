@@ -6,6 +6,8 @@ import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Component
 public class PlayerDAO {
     private final SessionFactory sessionFactory;
@@ -14,21 +16,16 @@ public class PlayerDAO {
         this.sessionFactory = sessionFactory;
     }
 
-//    public Player getPlayerById(Long playerId) {
-//        Session session = sessionFactory.getCurrentSession();
-//        return session.find(Player.class, playerId);
-//    }
-
     @Transactional(readOnly = true)
-    public Player getPlayerByName(String playerName) {
+    public Optional<Player> getPlayerByName(String playerName) {
         Session session = sessionFactory.getCurrentSession();
         return session.createQuery("FROM Player p WHERE p.name = :name", Player.class)
                 .setParameter("name", playerName)
-                .getSingleResult();
+                .uniqueResultOptional();
     }
 
     @Transactional
-    public Player createPlayer(String playerName) {
+    public Player savePlayer(String playerName) {
         Session session = sessionFactory.getCurrentSession();
         Player player = new Player(playerName);
         session.persist(player);

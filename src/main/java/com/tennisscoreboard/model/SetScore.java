@@ -1,7 +1,7 @@
 package com.tennisscoreboard.model;
 
-public class Game extends Score {
-    public Game() {
+public class SetScore extends Score {
+    public SetScore() {
         this.score = 0;
     }
 }

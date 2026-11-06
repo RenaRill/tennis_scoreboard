@@ -1,29 +1,44 @@
 package com.tennisscoreboard.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "matches")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Match {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "player1_id")
-    private Player player1;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "player1_id", nullable = false)
+    private Player firstPlayer;
 
-    @ManyToOne
-    @JoinColumn(name = "player2_id")
-    private Player player2;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "player2_id", nullable = false)
+    private Player secondPlayer;
 
-    @ManyToOne
-    @JoinColumn(name = "winner_id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "winner_id", nullable = false)
     private Player winner;
 
-    public Match(Player player1, Player player2, Player winner) {
-        this.player1 = player1;
-        this.player2 = player2;
+    public Match(Player firstPlayer, Player secondPlayer, Player winner) {
+        this.firstPlayer = firstPlayer;
+        this.secondPlayer = secondPlayer;
         this.winner = winner;
+    }
+
+    public String getFirstPlayerName() {
+        return firstPlayer.getName();
+    }
+
+    public String getSecondPlayerName() {
+        return secondPlayer.getName();
+    }
+
+    public String getWinnerName() {
+        return winner.getName();
     }
 }

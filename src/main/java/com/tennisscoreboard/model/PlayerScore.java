@@ -1,51 +1,86 @@
 package com.tennisscoreboard.model;
 
-import com.tennisscoreboard.exception.InvalidValueException;
 import lombok.Getter;
 
-@Getter
 public class PlayerScore {
-    private String name;
+    @Getter
+    private final String name;
+    @Getter
     private Points points;
-    private Game games;
-    private Set sets;
-    private TieBreak tieBreakPoints;
+    private final GameScore games;
+    private final SetScore sets;
+    private TieBreakScore tieBreakPoints;
 
     public PlayerScore(String name) {
         this.name = name;
         this.points = Points.LOVE;
-        this.games = new Game();
-        this.sets = new Set();
-        this.tieBreakPoints = null;
+        this.games = new GameScore();
+        this.sets = new SetScore();
     }
 
-    public void addPoint(Points scorerPoints) {
-        switch (scorerPoints) {
+    public void addPoint(Points playerPoints) {
+        switch (playerPoints) {
             case LOVE -> this.points = Points.FIFTEEN;
             case FIFTEEN -> this.points = Points.THIRTY;
             case THIRTY -> this.points = Points.FORTY;
-            case FORTY -> this.points = Points.ADVANTAGE;
-            default -> throw new InvalidValueException("Попытка обновления неправильного состояния.");
         }
     }
 
-    public void addGame(Game scorerGame) {
-        scorerGame.addScore();
+    public String getPointsScore() {
+        return points.getScore();
     }
 
-    public void addSet(Set scorerSet) {
-        scorerSet.addScore();
+    public int getGameScore() {
+        return games.getScore();
     }
 
-    public void addTieBreakPoint(TieBreak scorerPoints) {
-        scorerPoints.addScore();
+    public int getSetScore() {
+        return sets.getScore();
     }
 
-    public void nullPoints() {
-        this.points = null;
+    public int getTieBreakScore() {
+        return tieBreakPoints.getScore();
+    }
+
+    public void resetPoints() {
+        this.points = Points.LOVE;
+    }
+
+    public void removeAdvantage() {
+        this.points = Points.FORTY;
+    }
+
+    public void setAdvantage() {
+        this.points = Points.ADVANTAGE;
+    }
+
+    public int addAndGetGame() {
+        return games.add();
+    }
+
+    public void resetGames() {
+        games.reset();
+    }
+
+    public int addAndGetSet() {
+        return sets.add();
+    }
+
+    public int addAndGetTieBreakPoint() {
+        return tieBreakPoints.add();
     }
 
     public void startTieBreak() {
-        tieBreakPoints.start();
+        this.points = null;
+        this.tieBreakPoints = new TieBreakScore();
+    }
+
+    public void endTieBreak() {
+        this.points = Points.LOVE;
+        this.tieBreakPoints = null;
+    }
+
+    public boolean isTieBreak() {
+        return tieBreakPoints != null;
     }
 }

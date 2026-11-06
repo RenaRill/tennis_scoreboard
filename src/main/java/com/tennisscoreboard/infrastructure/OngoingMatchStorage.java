@@ -3,8 +3,8 @@ package com.tennisscoreboard.infrastructure;
 import com.tennisscoreboard.model.OngoingMatch;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,15 +13,13 @@ public class OngoingMatchStorage {
 
     private final Map<UUID, OngoingMatch> matches = new ConcurrentHashMap<>();
 
-    public void addNewMatch(OngoingMatch ongoingMatch) {
-        matches.put(UUID.randomUUID(), ongoingMatch);
+    public UUID addMatch(OngoingMatch ongoingMatch) {
+        UUID id = UUID.randomUUID();
+        matches.put(id, ongoingMatch);
+        return id;
     }
 
-    public Collection<OngoingMatch> getAllMatches() {
-        return matches.values();
-    }
-
-    public OngoingMatch getMatch(UUID id) {
-        return matches.get(id);
+    public Optional<OngoingMatch> getMatch(UUID id) {
+        return Optional.ofNullable(matches.get(id));
     }
 }

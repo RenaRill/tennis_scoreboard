@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public abstract class Score {
-    int score;
+    protected int score;
 
-    public void addScore() {
-        score += 1;
+    public int add() {
+        score++;
+        return score;
     }
-
 }
