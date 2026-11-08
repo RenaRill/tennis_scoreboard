@@ -6,8 +6,7 @@ import lombok.Getter;
 public abstract class Score {
     protected int score;
 
-    public int add() {
+    public void add() {
         score++;
-        return score;
     }
 }

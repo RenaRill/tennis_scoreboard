@@ -17,6 +17,9 @@ public class OngoingMatch {
     private final PlayerScore secondPlayerScore;
 
     public OngoingMatch(String firstPlayerName, String secondPlayerName) {
+        if (Objects.equals(firstPlayerName, secondPlayerName)) {
+            throw new InvalidValueException("Имена игроков не могут совпадать.");
+        }
         this.firstPlayerScore = new PlayerScore(firstPlayerName);
         this.secondPlayerScore = new PlayerScore(secondPlayerName);
     }
@@ -55,9 +58,10 @@ public class OngoingMatch {
     }
 
     public void addGame(PlayerScore player) {
+        player.addGame();
         PlayerScore opponent = findOpponent(player);
 
-        int playerGames = player.addAndGetGame();
+        int playerGames = player.getGameScore();
         int opponentGames = opponent.getGameScore();
 
         player.resetPoints();
@@ -73,7 +77,7 @@ public class OngoingMatch {
     }
 
     public void addSet(PlayerScore player) {
-        player.addAndGetSet();
+        player.addSet();
         PlayerScore opponent = findOpponent(player);
 
         player.resetGames();
@@ -81,9 +85,11 @@ public class OngoingMatch {
     }
 
     public void addTieBreakPoint(PlayerScore player) {
+        player.addTieBreakPoint();
+
         PlayerScore opponent = findOpponent(player);
 
-        int playerTieBreak = player.addAndGetTieBreakPoint();
+        int playerTieBreak = player.getTieBreakScore();
         int opponentTieBreak = opponent.getTieBreakScore();
 
         if (playerTieBreak >= MIN_TIE_BREAK_POINTS_FOR_WIN && playerTieBreak - opponentTieBreak >= MIN_MARGIN) {

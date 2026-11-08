@@ -54,20 +54,20 @@ public class PlayerScore {
         this.points = Points.ADVANTAGE;
     }
 
-    public int addAndGetGame() {
-        return games.add();
+    public void addGame() {
+        games.add();
     }
 
     public void resetGames() {
         games.reset();
     }
 
-    public int addAndGetSet() {
-        return sets.add();
+    public void addSet() {
+        sets.add();
     }
 
-    public int addAndGetTieBreakPoint() {
-        return tieBreakPoints.add();
+    public void addTieBreakPoint() {
+        tieBreakPoints.add();
     }
 
     public void startTieBreak() {

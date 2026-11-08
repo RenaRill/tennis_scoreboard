@@ -2,10 +2,13 @@ package com.tennisscoreboard;
 
 import com.tennisscoreboard.dao.MatchDAO;
 import com.tennisscoreboard.dao.PlayerDAO;
+import com.tennisscoreboard.dto.request.CreateMatchRequestDTO;
 import com.tennisscoreboard.exception.InvalidValueException;
 import com.tennisscoreboard.infrastructure.OngoingMatchStorage;
 import com.tennisscoreboard.model.OngoingMatch;
-import com.tennisscoreboard.service.MatchService;
+import com.tennisscoreboard.service.OngoingMatchesService;
+import com.tennisscoreboard.service.PlayerService;
+import com.tennisscoreboard.util.MappingUtils;
 import org.junit.jupiter.api.*;
 
 import java.util.UUID;
@@ -13,30 +16,29 @@ import java.util.UUID;
 import static org.mockito.Mockito.mock;
 
 public class AddPointTest {
-    private PlayerDAO playerDAO;
-    private MatchDAO matchDAO;
-    private OngoingMatchStorage matchStorage;
-
-    private MatchService matchService;
+    private OngoingMatchesService ongoingMatchesService;
     private OngoingMatch match;
     private UUID id;
 
     @BeforeEach
     void setupThis(){
-        playerDAO = mock(PlayerDAO.class);
-        matchDAO = mock(MatchDAO.class);
-        matchStorage = new OngoingMatchStorage();
-        matchService = new MatchService(playerDAO, matchDAO, matchStorage);
+        PlayerDAO playerDAO = mock(PlayerDAO.class);
+        MatchDAO matchDAO = mock(MatchDAO.class);
+        OngoingMatchStorage matchStorage = new OngoingMatchStorage();
+        PlayerService playerService = new PlayerService(playerDAO);
+        MappingUtils mappingUtils = new MappingUtils();
+        ongoingMatchesService = new OngoingMatchesService(matchDAO, matchStorage, playerService, mappingUtils);
 
-        match = new OngoingMatch("Oliver", "Jack");
-        id = matchService.startMatch(match);
+        CreateMatchRequestDTO requestDTO = new CreateMatchRequestDTO("Oliver", "Jack");
+        id = ongoingMatchesService.createMatch(requestDTO).getId();
+        match = ongoingMatchesService.findMatch(id);
     }
 
     // Обычное увеличение очка: 0-0 -> 15-0
     @Test
     void testAddPoint()
     {
-        matchService.addPoint(id, "Oliver"); // 15-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 15-0
         Assertions.assertEquals("15", match.getPlayerScore("Oliver").getPointsScore());
     }
 
@@ -52,14 +54,14 @@ public class AddPointTest {
     @Test
     void testAddPointAndDeuce()
     {
-        matchService.addPoint(id, "Oliver"); // 15-0
-        matchService.addPoint(id, "Oliver"); // 30-0
-        matchService.addPoint(id, "Oliver"); // 40-0
-        matchService.addPoint(id, "Jack"); // 40-15
-        matchService.addPoint(id, "Jack"); // 40-30
-        matchService.addPoint(id, "Jack"); // 40-40
-        matchService.addPoint(id, "Jack"); // 40-AD
-        matchService.addPoint(id, "Oliver"); // 40-40
+        ongoingMatchesService.addPoint(id, "Oliver"); // 15-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 30-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 40-0
+        ongoingMatchesService.addPoint(id, "Jack"); // 40-15
+        ongoingMatchesService.addPoint(id, "Jack"); // 40-30
+        ongoingMatchesService.addPoint(id, "Jack"); // 40-40
+        ongoingMatchesService.addPoint(id, "Jack"); // 40-AD
+        ongoingMatchesService.addPoint(id, "Oliver"); // 40-40
         Assertions.assertEquals("40", match.getPlayerScore("Jack").getPointsScore());
     }
 
@@ -67,14 +69,14 @@ public class AddPointTest {
     @Test
     void testAddPointToAdvantageAndWinGame()
     {
-        matchService.addPoint(id, "Oliver"); // 15-0
-        matchService.addPoint(id, "Oliver"); // 30-0
-        matchService.addPoint(id, "Oliver"); // 40-0
-        matchService.addPoint(id, "Jack"); // 40-15
-        matchService.addPoint(id, "Jack"); // 40-30
-        matchService.addPoint(id, "Jack"); // 40-40
-        matchService.addPoint(id, "Oliver"); // AD-40
-        matchService.addPoint(id, "Oliver"); // Win game
+        ongoingMatchesService.addPoint(id, "Oliver"); // 15-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 30-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 40-0
+        ongoingMatchesService.addPoint(id, "Jack"); // 40-15
+        ongoingMatchesService.addPoint(id, "Jack"); // 40-30
+        ongoingMatchesService.addPoint(id, "Jack"); // 40-40
+        ongoingMatchesService.addPoint(id, "Oliver"); // AD-40
+        ongoingMatchesService.addPoint(id, "Oliver"); // Win game
         Assertions.assertEquals(1, match.getPlayerScore("Oliver").getGameScore());
     }
 
@@ -99,18 +101,18 @@ public class AddPointTest {
     void testWinTieBreak()
     {
         startTieBreak();
-        matchService.addPoint(id, "Oliver"); // 1-0
-        matchService.addPoint(id, "Oliver"); // 2-0
-        matchService.addPoint(id, "Oliver"); // 3-0
-        matchService.addPoint(id, "Oliver"); // 4-0
-        matchService.addPoint(id, "Oliver"); // 5-0
-        matchService.addPoint(id, "Oliver"); // 6-0
-        matchService.addPoint(id, "Jack"); // 6-1
-        matchService.addPoint(id, "Jack"); // 6-2
-        matchService.addPoint(id, "Jack"); // 6-3
-        matchService.addPoint(id, "Jack"); // 6-4
-        matchService.addPoint(id, "Jack"); // 6-5
-        matchService.addPoint(id, "Oliver"); // Win set
+        ongoingMatchesService.addPoint(id, "Oliver"); // 1-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 2-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 3-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 4-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 5-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 6-0
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-1
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-2
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-3
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-4
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-5
+        ongoingMatchesService.addPoint(id, "Oliver"); // Win set
         Assertions.assertEquals(1, match.getPlayerScore("Oliver").getSetScore());
     }
 
@@ -119,19 +121,19 @@ public class AddPointTest {
     void testEndTieBreak()
     {
         startTieBreak();
-        matchService.addPoint(id, "Oliver"); // 1-0
-        matchService.addPoint(id, "Oliver"); // 2-0
-        matchService.addPoint(id, "Oliver"); // 3-0
-        matchService.addPoint(id, "Oliver"); // 4-0
-        matchService.addPoint(id, "Oliver"); // 5-0
-        matchService.addPoint(id, "Oliver"); // 6-0
-        matchService.addPoint(id, "Jack"); // 6-1
-        matchService.addPoint(id, "Jack"); // 6-2
-        matchService.addPoint(id, "Jack"); // 6-3
-        matchService.addPoint(id, "Jack"); // 6-4
-        matchService.addPoint(id, "Jack"); // 6-5
-        matchService.addPoint(id, "Oliver"); // Win set
-        matchService.addPoint(id, "Oliver"); // 15-0 in a new set
+        ongoingMatchesService.addPoint(id, "Oliver"); // 1-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 2-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 3-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 4-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 5-0
+        ongoingMatchesService.addPoint(id, "Oliver"); // 6-0
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-1
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-2
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-3
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-4
+        ongoingMatchesService.addPoint(id, "Jack"); // 6-5
+        ongoingMatchesService.addPoint(id, "Oliver"); // Win set
+        ongoingMatchesService.addPoint(id, "Oliver"); // 15-0 in a new set
         Assertions.assertEquals("15", match.getPlayerScore("Oliver").getPointsScore());
     }
 
@@ -141,16 +143,17 @@ public class AddPointTest {
     {
         simpleWinSet();
         simpleWinSet();
-        Assertions.assertEquals("Oliver", match.getWinnerName());
+        Assertions.assertEquals("Oliver", match.getWinnerName().orElse(null));
     }
 
     // Неизвестное имя при попытке добавления очка
     @Test
     void testUnknownName()
     {
-        InvalidValueException exception = Assertions.assertThrows(InvalidValueException.class, () -> {
-            matchService.addPoint(id, "Alice");
-        });
+        InvalidValueException exception = Assertions.assertThrows(
+                InvalidValueException.class,
+                () -> ongoingMatchesService.addPoint(id, "Alice")
+        );
         Assertions.assertEquals("Игрок с таким именем не найден.", exception.getMessage());
     }
 
@@ -160,15 +163,15 @@ public class AddPointTest {
     {
         simpleWinSet();
         simpleWinSet(); // winner - Oliver
-        matchService.addPoint(id, "Oliver");
+        ongoingMatchesService.addPoint(id, "Oliver");
         Assertions.assertEquals("0", match.getPlayerScore("Oliver").getPointsScore());
     }
 
     void simpleWinGame(String name) {
-        matchService.addPoint(id, name); // 15
-        matchService.addPoint(id, name); // 30
-        matchService.addPoint(id, name); // 40
-        matchService.addPoint(id, name); // Win game
+        ongoingMatchesService.addPoint(id, name); // 15
+        ongoingMatchesService.addPoint(id, name); // 30
+        ongoingMatchesService.addPoint(id, name); // 40
+        ongoingMatchesService.addPoint(id, name); // Win game
     }
 
     void simpleWinSet() {
