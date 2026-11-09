@@ -2,7 +2,6 @@ package com.tennisscoreboard.dao;
 
 import com.tennisscoreboard.entity.Match;
 import com.tennisscoreboard.entity.Player;
-import com.tennisscoreboard.util.Pagination;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;
@@ -19,7 +18,7 @@ public class MatchDAO {
     }
 
     @Transactional(readOnly = true)
-    public List<Match> getAllMatches(int page) {
+    public List<Match> getAllMatches(int offset, int limit) {
         Session session = sessionFactory.getCurrentSession();
         return session.createQuery(
                         "FROM Match m " +
@@ -29,13 +28,13 @@ public class MatchDAO {
                                 "ORDER BY m.id",
                         Match.class
                 )
-                .setFirstResult((page - 1) * Pagination.PAGE_SIZE)
-                .setMaxResults(Pagination.PAGE_SIZE)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 
     @Transactional(readOnly = true)
-    public List<Match> getPlayerMatches(int page, String playerName) {
+    public List<Match> getPlayerMatches(String playerName, int offset, int limit) {
         Session session = sessionFactory.getCurrentSession();
         return session.createQuery(
                         "FROM Match m " +
@@ -47,8 +46,8 @@ public class MatchDAO {
                         Match.class
                 )
                 .setParameter("name", playerName)
-                .setFirstResult((page - 1) * Pagination.PAGE_SIZE)
-                .setMaxResults(Pagination.PAGE_SIZE)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 

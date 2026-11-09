@@ -22,13 +22,14 @@ public class CompletedMatchesService {
 
     public GetCompletedMatchesResponseDTO getMatches(int page, String name) {
         List<Match> matches;
+        int offset = Pagination.countOffset(page);
+        int limit = Pagination.PAGE_SIZE;
         long totalCount;
-
         if (name != null && !name.isBlank()) {
-            matches = matchDAO.getPlayerMatches(page, name);
+            matches = matchDAO.getPlayerMatches(name, offset, limit);
             totalCount = matchDAO.countPlayerMatches(name);
         } else {
-            matches = matchDAO.getAllMatches(page);
+            matches = matchDAO.getAllMatches(offset, limit);
             totalCount = matchDAO.countAllMatches();
         }
 
