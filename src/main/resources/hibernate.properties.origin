@@ -1,8 +1,8 @@
 # PostgreSQL Configuration
-hibernate.connection.driver_class=org.postgresql.Driver
-hibernate.connection.url=
-hibernate.connection.username=
-hibernate.connection.password=
+db.driver=org.postgresql.Driver
+db.url=
+db.username=
+db.password=
 
 # Hibernate Configuration
 hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect

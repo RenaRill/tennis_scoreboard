@@ -1,15 +1,17 @@
 package com.tennisscoreboard.util;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.hibernate.HibernateTransactionManager;
 import org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
@@ -23,15 +25,16 @@ public class HibernateConfig {
     }
 
     @Bean
-    public DriverManagerDataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    public DataSource dataSource() {
+        HikariConfig config = new HikariConfig();
 
-        dataSource.setDriverClassName(env.getRequiredProperty("hibernate.connection.driver_class"));
-        dataSource.setUrl(env.getRequiredProperty("hibernate.connection.url"));
-        dataSource.setUsername(env.getRequiredProperty("hibernate.connection.username"));
-        dataSource.setPassword(env.getRequiredProperty("hibernate.connection.password"));
+        config.setDriverClassName(env.getRequiredProperty("db.driver"));
+        config.setJdbcUrl(env.getRequiredProperty("db.url"));
+        config.setUsername(env.getRequiredProperty("db.username"));
+        config.setPassword(env.getRequiredProperty("db.password"));
+        config.setConnectionTimeout(10000);
 
-        return dataSource;
+        return new HikariDataSource(config);
     }
 
     @Bean
