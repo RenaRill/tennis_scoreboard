@@ -7,6 +7,7 @@ import com.tennisscoreboard.entity.Match;
 import com.tennisscoreboard.util.MappingUtils;
 import com.tennisscoreboard.util.Pagination;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class CompletedMatchesService {
         this.mappingUtils = mappingUtils;
     }
 
+    @Transactional(readOnly = true)
     public GetCompletedMatchesResponseDTO getMatches(int page, String name) {
         List<Match> matches;
         int offset = Pagination.countOffset(page);

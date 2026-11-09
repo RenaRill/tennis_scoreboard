@@ -4,7 +4,6 @@ import com.tennisscoreboard.entity.Player;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -16,7 +15,6 @@ public class PlayerDAO {
         this.sessionFactory = sessionFactory;
     }
 
-    @Transactional(readOnly = true)
     public Optional<Player> getPlayerByName(String playerName) {
         Session session = sessionFactory.getCurrentSession();
         return session.createQuery("FROM Player p WHERE p.name = :name", Player.class)
@@ -24,7 +22,6 @@ public class PlayerDAO {
                 .uniqueResultOptional();
     }
 
-    @Transactional
     public Player savePlayer(String playerName) {
         Session session = sessionFactory.getCurrentSession();
         Player player = new Player(playerName);

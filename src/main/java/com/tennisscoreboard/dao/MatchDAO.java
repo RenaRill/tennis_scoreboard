@@ -5,7 +5,6 @@ import com.tennisscoreboard.entity.Player;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ public class MatchDAO {
         this.sessionFactory = sessionFactory;
     }
 
-    @Transactional(readOnly = true)
     public List<Match> getAllMatches(int offset, int limit) {
         Session session = sessionFactory.getCurrentSession();
         return session.createQuery(
@@ -33,7 +31,6 @@ public class MatchDAO {
                 .getResultList();
     }
 
-    @Transactional(readOnly = true)
     public List<Match> getPlayerMatches(String playerName, int offset, int limit) {
         Session session = sessionFactory.getCurrentSession();
         return session.createQuery(
@@ -51,14 +48,12 @@ public class MatchDAO {
                 .getResultList();
     }
 
-    @Transactional(readOnly = true)
     public Long countAllMatches() {
         Session session = sessionFactory.getCurrentSession();
         return session.createQuery("SELECT COUNT(m) FROM Match m", Long.class)
                 .getSingleResult();
     }
 
-    @Transactional(readOnly = true)
     public Long countPlayerMatches(String playerName) {
         Session session = sessionFactory.getCurrentSession();
         return session.createQuery(
@@ -68,7 +63,6 @@ public class MatchDAO {
                 .getSingleResult();
     }
 
-    @Transactional
     public void saveMatch(Player player1, Player player2, Player winner) {
         Session session = sessionFactory.getCurrentSession();
         Match match = new Match(player1, player2, winner);

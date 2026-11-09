@@ -9,6 +9,7 @@ import com.tennisscoreboard.infrastructure.OngoingMatchStorage;
 import com.tennisscoreboard.model.OngoingMatch;
 import com.tennisscoreboard.util.MappingUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ public class OngoingMatchesService {
         return mappingUtils.toCreateMatchDTO(matchStorage.addMatch(ongoingMatch));
     }
 
+    @Transactional
     public GetOngoingMatchResponseDTO addPoint(UUID id, String name) {
         OngoingMatch match = findMatch(id);
         if (!match.isCompleted()) {
