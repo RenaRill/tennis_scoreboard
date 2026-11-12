@@ -15,10 +15,21 @@ import java.util.List;
 public class CompletedMatchesService {
     private final MatchDAO matchDAO;
     private final MappingUtils mappingUtils;
+    private final PlayerService playerService;
 
-    public CompletedMatchesService(MatchDAO matchDAO, MappingUtils mappingUtils) {
+    public CompletedMatchesService(MatchDAO matchDAO, MappingUtils mappingUtils, PlayerService playerService) {
         this.matchDAO = matchDAO;
         this.mappingUtils = mappingUtils;
+        this.playerService = playerService;
+    }
+
+    @Transactional
+    public void saveMatch(String firstPlayerName, String secondPlayerName, String winnerName) {
+        matchDAO.saveMatch(
+                playerService.createOrGetPlayer(firstPlayerName),
+                playerService.createOrGetPlayer(secondPlayerName),
+                playerService.createOrGetPlayer(winnerName)
+        );
     }
 
     @Transactional(readOnly = true)

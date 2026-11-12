@@ -1,6 +1,5 @@
 package com.tennisscoreboard.service;
 
-import com.tennisscoreboard.dao.MatchDAO;
 import com.tennisscoreboard.dto.request.CreateMatchRequestDTO;
 import com.tennisscoreboard.dto.response.CreateMatchResponseDTO;
 import com.tennisscoreboard.dto.response.GetOngoingMatchResponseDTO;
@@ -9,26 +8,29 @@ import com.tennisscoreboard.infrastructure.OngoingMatchStorage;
 import com.tennisscoreboard.model.OngoingMatch;
 import com.tennisscoreboard.util.MappingUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Component
 public class OngoingMatchesService {
-    private final MatchDAO matchDAO;
     private final OngoingMatchStorage matchStorage;
     private final PlayerService playerService;
+    private final CompletedMatchesService completedMatchesService;
     private final MappingUtils mappingUtils;
 
-    public OngoingMatchesService(MatchDAO matchDAO, OngoingMatchStorage matchStorage, PlayerService playerService, MappingUtils mappingUtils) {
-        this.matchDAO = matchDAO;
+    public OngoingMatchesService(OngoingMatchStorage matchStorage, PlayerService playerService,
+                                 CompletedMatchesService completedMatchesService, MappingUtils mappingUtils) {
         this.matchStorage = matchStorage;
         this.playerService = playerService;
+        this.completedMatchesService = completedMatchesService;
         this.mappingUtils = mappingUtils;
     }
 
     public GetOngoingMatchResponseDTO getMatchScore(UUID id) {
-        return mappingUtils.toOngoingMatchDTO(findMatch(id));
+        OngoingMatch match = findMatch(id);
+        synchronized (match) {
+            return mappingUtils.toOngoingMatchDTO(match);
+        }
     }
 
     public CreateMatchResponseDTO createMatch(CreateMatchRequestDTO requestDTO) {
@@ -38,23 +40,27 @@ public class OngoingMatchesService {
         return mappingUtils.toCreateMatchDTO(matchStorage.addMatch(ongoingMatch));
     }
 
-    @Transactional
     public GetOngoingMatchResponseDTO addPoint(UUID id, String name) {
         OngoingMatch match = findMatch(id);
-        if (!match.isCompleted()) {
-            match.addPoint(name);
+        synchronized (match) {
+            if (!match.isCompleted()) {
+                match.addPoint(name);
 
-            match.getWinnerName().ifPresent(winnerName -> matchDAO.saveMatch(
-                    playerService.createOrGetPlayer(match.getFirstPlayerName()),
-                    playerService.createOrGetPlayer(match.getSecondPlayerName()),
-                    playerService.createOrGetPlayer(winnerName)
-            ));
-
+                if (match.isCompleted()) {
+                    completedMatchesService.saveMatch(
+                            match.getFirstPlayerName(),
+                            match.getSecondPlayerName(),
+                            match.getWinnerName().orElseThrow(
+                                    () -> new NotFoundException("Матч завершен, но победитель не определен."))
+                    );
+                    matchStorage.removeMatch(id);
+                }
+            }
+            return mappingUtils.toOngoingMatchDTO(match);
         }
-        return mappingUtils.toOngoingMatchDTO(match);
     }
 
-    public OngoingMatch findMatch(UUID id) {
+    private OngoingMatch findMatch(UUID id) {
         return matchStorage.getMatch(id).orElseThrow(() -> new NotFoundException("Матч с таким uuid не найден."));
     }
 }
