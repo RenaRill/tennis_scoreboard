@@ -1,134 +1,64 @@
 package com.tennisscoreboard.model;
 
-import com.tennisscoreboard.exception.InvalidValueException;
 import lombok.Getter;
 
-import java.util.Objects;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
 
-@Getter
 public class OngoingMatch {
-    private static final int MIN_GAMES_FOR_WIN = 6;
     private static final int SETS_TO_WIN = 2;
-    private static final int MIN_TIE_BREAK_POINTS_FOR_WIN = 7;
-    private static final int MIN_MARGIN = 2;
 
-    private final PlayerScore firstPlayerScore;
-    private final PlayerScore secondPlayerScore;
+    @Getter
+    private final Players players;
+    private final Map<PlayerSide, Integer> sets = new EnumMap<>(PlayerSide.class);
+    private TennisSet currentSet = new TennisSet();
 
     public OngoingMatch(String firstPlayerName, String secondPlayerName) {
-        if (Objects.equals(firstPlayerName, secondPlayerName)) {
-            throw new InvalidValueException("Имена игроков не могут совпадать.");
-        }
-        this.firstPlayerScore = new PlayerScore(firstPlayerName);
-        this.secondPlayerScore = new PlayerScore(secondPlayerName);
+        players = new Players(firstPlayerName, secondPlayerName);
+        sets.put(PlayerSide.FIRST, 0);
+        sets.put(PlayerSide.SECOND, 0);
     }
 
-    public String getFirstPlayerName() {
-        return firstPlayerScore.getName();
-    }
-
-    public String getSecondPlayerName() {
-        return secondPlayerScore.getName();
-    }
-
-    public Optional<String> getWinnerName() {
-        if (firstPlayerScore.getSetScore() == SETS_TO_WIN) {
-            return Optional.of(firstPlayerScore.getName());
-        } else if (secondPlayerScore.getSetScore() == SETS_TO_WIN) {
-            return Optional.of(secondPlayerScore.getName());
-        }
-        return Optional.empty();
-    }
-
-    public void addPoint(String name) {
-        PlayerScore player = getPlayerScore(name);
-        if (player.isTieBreak()) {
-            addTieBreakPoint(player);
-        } else {
-            Points points = player.getPoints();
-            if (points == Points.ADVANTAGE) {
-                addGame(player);
-            } else if (points == Points.FORTY) {
-                checkOpponentAdvantage(player);
-            } else {
-                player.addPoint(points);
+    public void addPoint(String playerName) {
+        PlayerSide playerSide = players.sideOf(playerName);
+        if (!isCompleted()) {
+            if (currentSet.addPoint(playerSide)) {
+                sets.merge(playerSide, 1, Integer::sum);
+                currentSet = new TennisSet();
             }
         }
     }
 
-    public void addGame(PlayerScore player) {
-        player.addGame();
-        PlayerScore opponent = findOpponent(player);
-
-        int playerGames = player.getGameScore();
-        int opponentGames = opponent.getGameScore();
-
-        player.resetPoints();
-        opponent.resetPoints();
-
-        if (playerGames == MIN_GAMES_FOR_WIN && opponentGames == MIN_GAMES_FOR_WIN) {
-            player.startTieBreak();
-            opponent.startTieBreak();
-        }
-        if (playerGames >= MIN_GAMES_FOR_WIN && playerGames - opponentGames >= MIN_MARGIN) {
-            addSet(player);
-        }
+    public String getFirstPlayerName() {
+        return players.firstPlayerName();
     }
 
-    public void addSet(PlayerScore player) {
-        player.addSet();
-        PlayerScore opponent = findOpponent(player);
-
-        player.resetGames();
-        opponent.resetGames();
+    public String getSecondPlayerName() {
+        return players.secondPlayerName();
     }
 
-    public void addTieBreakPoint(PlayerScore player) {
-        player.addTieBreakPoint();
-
-        PlayerScore opponent = findOpponent(player);
-
-        int playerTieBreak = player.getTieBreakScore();
-        int opponentTieBreak = opponent.getTieBreakScore();
-
-        if (playerTieBreak >= MIN_TIE_BREAK_POINTS_FOR_WIN && playerTieBreak - opponentTieBreak >= MIN_MARGIN) {
-            player.endTieBreak();
-            opponent.endTieBreak();
-            addSet(player);
+    public Optional<String> getWinnerName() {
+        if (sets.get(PlayerSide.FIRST) == SETS_TO_WIN) {
+            return Optional.of(getPlayers().nameOf(PlayerSide.FIRST));
+        } else if (sets.get(PlayerSide.SECOND) == SETS_TO_WIN) {
+            return Optional.of(getPlayers().nameOf(PlayerSide.SECOND));
         }
+        return Optional.empty();
     }
 
     public boolean isCompleted() {
         return getWinnerName().isPresent();
     }
 
-    public PlayerScore getPlayerScore(String name) {
-        if (Objects.equals(name, getFirstPlayerName())) {
-            return firstPlayerScore;
-        } else if (Objects.equals(name, getSecondPlayerName())) {
-            return secondPlayerScore;
-        }
-        throw new InvalidValueException("Игрок с таким именем не найден.");
-    }
-
-    private PlayerScore findOpponent(PlayerScore player) {
-        if (Objects.equals(player.getName(), getFirstPlayerName())) {
-            return secondPlayerScore;
-        } else if (Objects.equals(player.getName(), getSecondPlayerName())) {
-            return firstPlayerScore;
-        }
-        throw new InvalidValueException("Игрок с таким именем не найден.");
-    }
-
-    private void checkOpponentAdvantage(PlayerScore player) {
-        PlayerScore opponent = findOpponent(player);
-        if (opponent.getPoints() == Points.ADVANTAGE) {
-            opponent.removeAdvantage();
-        } else if (opponent.getPoints() == Points.FORTY) {
-            player.setAdvantage();
-        } else {
-            addGame(player);
-        }
+    public PlayerScore getPlayerScore(String playerName) {
+        PlayerSide playerSide = players.sideOf(playerName);
+        return new PlayerScore(
+                playerName,
+                currentSet.getPoints(playerSide),
+                currentSet.getGames(playerSide),
+                sets.get(playerSide),
+                currentSet.isTieBreak()
+        );
     }
 }

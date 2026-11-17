@@ -22,8 +22,4 @@ public class OngoingMatchStorage {
     public Optional<OngoingMatch> getMatch(UUID id) {
         return Optional.ofNullable(matches.get(id));
     }
-
-    public void removeMatch(UUID id) {
-        matches.remove(id);
-    }
 }

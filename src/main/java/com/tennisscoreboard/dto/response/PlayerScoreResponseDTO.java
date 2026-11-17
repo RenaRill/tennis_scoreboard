@@ -10,5 +10,5 @@ public class PlayerScoreResponseDTO {
     private String points;
     private int games;
     private int sets;
-    private Integer tieBreakPoints;
+    private String tieBreakPoints;
 }

@@ -14,14 +14,12 @@ import java.util.UUID;
 @Component
 public class OngoingMatchesService {
     private final OngoingMatchStorage matchStorage;
-    private final PlayerService playerService;
     private final CompletedMatchesService completedMatchesService;
     private final MappingUtils mappingUtils;
 
-    public OngoingMatchesService(OngoingMatchStorage matchStorage, PlayerService playerService,
-                                 CompletedMatchesService completedMatchesService, MappingUtils mappingUtils) {
+    public OngoingMatchesService(OngoingMatchStorage matchStorage, CompletedMatchesService completedMatchesService,
+                                 MappingUtils mappingUtils) {
         this.matchStorage = matchStorage;
-        this.playerService = playerService;
         this.completedMatchesService = completedMatchesService;
         this.mappingUtils = mappingUtils;
     }
@@ -35,26 +33,21 @@ public class OngoingMatchesService {
 
     public CreateMatchResponseDTO createMatch(CreateMatchRequestDTO requestDTO) {
         OngoingMatch ongoingMatch = mappingUtils.toOngoingMatchModel(requestDTO);
-        playerService.createOrGetPlayer(ongoingMatch.getFirstPlayerName().strip());
-        playerService.createOrGetPlayer(ongoingMatch.getSecondPlayerName().strip());
         return mappingUtils.toCreateMatchDTO(matchStorage.addMatch(ongoingMatch));
     }
 
     public GetOngoingMatchResponseDTO addPoint(UUID id, String name) {
         OngoingMatch match = findMatch(id);
         synchronized (match) {
-            if (!match.isCompleted()) {
-                match.addPoint(name);
+            match.addPoint(name);
 
-                if (match.isCompleted()) {
-                    completedMatchesService.saveMatch(
-                            match.getFirstPlayerName(),
-                            match.getSecondPlayerName(),
-                            match.getWinnerName().orElseThrow(
-                                    () -> new NotFoundException("Матч завершен, но победитель не определен."))
-                    );
-                    matchStorage.removeMatch(id);
-                }
+            if (match.isCompleted()) {
+                completedMatchesService.saveMatch(
+                        match.getFirstPlayerName(),
+                        match.getSecondPlayerName(),
+                        match.getWinnerName().orElseThrow(
+                                () -> new NotFoundException("Матч завершен, но победитель не определен."))
+                );
             }
             return mappingUtils.toOngoingMatchDTO(match);
         }

@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Component
 public class MappingUtils {
+
     public OngoingMatch toOngoingMatchModel(CreateMatchRequestDTO createMatchRequestDTO) {
         return new OngoingMatch(
                 createMatchRequestDTO.getFirstPlayerName(),
@@ -30,25 +31,25 @@ public class MappingUtils {
 
     public PlayerScoreResponseDTO toPlayerScoreDTO(PlayerScore playerScore) {
         String points = null;
-        Integer tieBreakPoints = null;
-        if (playerScore.isTieBreak()) {
-            tieBreakPoints = playerScore.getTieBreakScore();
+        String tieBreakPoints = null;
+        if (playerScore.tieBreak()) {
+            tieBreakPoints = playerScore.points();
         } else {
-            points = playerScore.getPointsScore();
+            points = playerScore.points();
         }
         return new PlayerScoreResponseDTO(
-                playerScore.getName(),
+                playerScore.name(),
                 points,
-                playerScore.getGameScore(),
-                playerScore.getSetScore(),
+                playerScore.games(),
+                playerScore.sets(),
                 tieBreakPoints
         );
     }
 
     public GetOngoingMatchResponseDTO toOngoingMatchDTO(OngoingMatch ongoingMatch) {
         return new GetOngoingMatchResponseDTO(
-                toPlayerScoreDTO(ongoingMatch.getFirstPlayerScore()),
-                toPlayerScoreDTO(ongoingMatch.getSecondPlayerScore()),
+                toPlayerScoreDTO(ongoingMatch.getPlayerScore(ongoingMatch.getFirstPlayerName())),
+                toPlayerScoreDTO(ongoingMatch.getPlayerScore(ongoingMatch.getSecondPlayerName())),
                 ongoingMatch.getWinnerName().orElse(null)
         );
     }
