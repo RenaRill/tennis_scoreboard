@@ -1,4 +1,4 @@
-package com.tennisscoreboard.util;
+package com.tennisscoreboard.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

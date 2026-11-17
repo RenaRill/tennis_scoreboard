@@ -1,4 +1,4 @@
-package com.tennisscoreboard.util;
+package com.tennisscoreboard.mapper;
 
 import com.tennisscoreboard.dto.request.CreateMatchRequestDTO;
 import com.tennisscoreboard.dto.response.*;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class MappingUtils {
+public class Mapper {
 
     public OngoingMatch toOngoingMatchModel(CreateMatchRequestDTO createMatchRequestDTO) {
         return new OngoingMatch(

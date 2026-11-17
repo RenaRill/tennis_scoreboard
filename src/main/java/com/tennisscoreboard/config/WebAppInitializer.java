@@ -1,4 +1,4 @@
-package com.tennisscoreboard.util;
+package com.tennisscoreboard.config;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;

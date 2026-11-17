@@ -20,14 +20,16 @@ public class OngoingMatch {
         sets.put(PlayerSide.SECOND, 0);
     }
 
-    public void addPoint(String playerName) {
-        PlayerSide playerSide = players.sideOf(playerName);
-        if (!isCompleted()) {
-            if (currentSet.addPoint(playerSide)) {
-                sets.merge(playerSide, 1, Integer::sum);
-                currentSet = new TennisSet();
-            }
+    public boolean addPoint(String playerName) {
+        if (isCompleted()) {
+            return false;
         }
+        PlayerSide playerSide = players.sideOf(playerName);
+        if (currentSet.addPoint(playerSide)) {
+            sets.merge(playerSide, 1, Integer::sum);
+            currentSet = new TennisSet();
+        }
+        return isCompleted();
     }
 
     public String getFirstPlayerName() {

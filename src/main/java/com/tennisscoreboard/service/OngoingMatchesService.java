@@ -6,7 +6,7 @@ import com.tennisscoreboard.dto.response.GetOngoingMatchResponseDTO;
 import com.tennisscoreboard.exception.NotFoundException;
 import com.tennisscoreboard.infrastructure.OngoingMatchStorage;
 import com.tennisscoreboard.model.OngoingMatch;
-import com.tennisscoreboard.util.MappingUtils;
+import com.tennisscoreboard.mapper.Mapper;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -15,33 +15,31 @@ import java.util.UUID;
 public class OngoingMatchesService {
     private final OngoingMatchStorage matchStorage;
     private final CompletedMatchesService completedMatchesService;
-    private final MappingUtils mappingUtils;
+    private final Mapper mapper;
 
     public OngoingMatchesService(OngoingMatchStorage matchStorage, CompletedMatchesService completedMatchesService,
-                                 MappingUtils mappingUtils) {
+                                 Mapper mapper) {
         this.matchStorage = matchStorage;
         this.completedMatchesService = completedMatchesService;
-        this.mappingUtils = mappingUtils;
+        this.mapper = mapper;
     }
 
     public GetOngoingMatchResponseDTO getMatchScore(UUID id) {
         OngoingMatch match = findMatch(id);
         synchronized (match) {
-            return mappingUtils.toOngoingMatchDTO(match);
+            return mapper.toOngoingMatchDTO(match);
         }
     }
 
     public CreateMatchResponseDTO createMatch(CreateMatchRequestDTO requestDTO) {
-        OngoingMatch ongoingMatch = mappingUtils.toOngoingMatchModel(requestDTO);
-        return mappingUtils.toCreateMatchDTO(matchStorage.addMatch(ongoingMatch));
+        OngoingMatch ongoingMatch = mapper.toOngoingMatchModel(requestDTO);
+        return mapper.toCreateMatchDTO(matchStorage.addMatch(ongoingMatch));
     }
 
     public GetOngoingMatchResponseDTO addPoint(UUID id, String name) {
         OngoingMatch match = findMatch(id);
         synchronized (match) {
-            match.addPoint(name);
-
-            if (match.isCompleted()) {
+            if (match.addPoint(name)) {
                 completedMatchesService.saveMatch(
                         match.getFirstPlayerName(),
                         match.getSecondPlayerName(),
@@ -49,7 +47,7 @@ public class OngoingMatchesService {
                                 () -> new NotFoundException("Матч завершен, но победитель не определен."))
                 );
             }
-            return mappingUtils.toOngoingMatchDTO(match);
+            return mapper.toOngoingMatchDTO(match);
         }
     }
 

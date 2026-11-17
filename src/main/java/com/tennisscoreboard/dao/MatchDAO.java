@@ -4,7 +4,6 @@ import com.tennisscoreboard.entity.Match;
 import com.tennisscoreboard.entity.Player;
 import com.tennisscoreboard.exception.DatabaseAccessException;
 import jakarta.persistence.PersistenceException;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;

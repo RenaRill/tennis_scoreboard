@@ -4,7 +4,7 @@ import com.tennisscoreboard.dao.MatchDAO;
 import com.tennisscoreboard.dto.response.CompletedMatchResponseDTO;
 import com.tennisscoreboard.dto.response.GetCompletedMatchesResponseDTO;
 import com.tennisscoreboard.entity.Match;
-import com.tennisscoreboard.util.MappingUtils;
+import com.tennisscoreboard.mapper.Mapper;
 import com.tennisscoreboard.util.Pagination;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,12 +14,12 @@ import java.util.List;
 @Component
 public class CompletedMatchesService {
     private final MatchDAO matchDAO;
-    private final MappingUtils mappingUtils;
+    private final Mapper mapper;
     private final PlayerService playerService;
 
-    public CompletedMatchesService(MatchDAO matchDAO, MappingUtils mappingUtils, PlayerService playerService) {
+    public CompletedMatchesService(MatchDAO matchDAO, Mapper mapper, PlayerService playerService) {
         this.matchDAO = matchDAO;
-        this.mappingUtils = mappingUtils;
+        this.mapper = mapper;
         this.playerService = playerService;
     }
 
@@ -47,9 +47,9 @@ public class CompletedMatchesService {
         }
 
         List<CompletedMatchResponseDTO> matchesDTO = matches.stream()
-                .map(mappingUtils::toCompletedMatchDTO)
+                .map(mapper::toCompletedMatchDTO)
                 .toList();
 
-        return mappingUtils.toCompletedMatchesDTO(matchesDTO, page, Pagination.countTotalPages(totalCount));
+        return mapper.toCompletedMatchesDTO(matchesDTO, page, Pagination.countTotalPages(totalCount));
     }
 }

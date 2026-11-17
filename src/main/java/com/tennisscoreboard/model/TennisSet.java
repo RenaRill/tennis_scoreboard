@@ -28,28 +28,27 @@ public class TennisSet {
     }
 
     public boolean addPoint(PlayerSide side) {
-        boolean isWin = gameState.addPoint(side);
         boolean wasTieBreak = isTieBreak();
-        if (!isWin) {
+        if (!gameState.addPoint(side)) {
             return false;
         }
         if (wasTieBreak) {
-            //endTieBreak();
             return true;
         }
         int newValue = games.merge(side, 1, Integer::sum);
         int opponentGames = games.get(side.getOpponent());
-
-        if (newValue >= MIN_GAMES_FOR_WIN && newValue - opponentGames >= MIN_MARGIN) {
+        if (isWin(newValue, opponentGames)) {
             return true;
         }
-
-        if (newValue == MIN_GAMES_FOR_WIN && opponentGames == MIN_GAMES_FOR_WIN) {
-            //startTieBreak();
-            gameState = new TieBreakGame();
-        } else {
-            gameState = new StandardGame();
-        }
+        gameState = startTieBreak(newValue, opponentGames) ? new TieBreakGame() : new StandardGame();
         return false;
+    }
+
+    private boolean isWin(int games, int opponentGames) {
+        return games >= MIN_GAMES_FOR_WIN && games - opponentGames >= MIN_MARGIN;
+    }
+
+    private boolean startTieBreak(int games, int opponentGames) {
+        return games == MIN_GAMES_FOR_WIN && opponentGames == MIN_GAMES_FOR_WIN;
     }
 }

@@ -1,4 +1,4 @@
-package com.tennisscoreboard.util;
+package com.tennisscoreboard.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

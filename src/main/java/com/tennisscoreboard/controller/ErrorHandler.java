@@ -1,4 +1,4 @@
-package com.tennisscoreboard.util;
+package com.tennisscoreboard.controller;
 
 import com.tennisscoreboard.dto.response.ErrorResponseDTO;
 import com.tennisscoreboard.exception.DatabaseAccessException;
