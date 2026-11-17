@@ -73,8 +73,8 @@ public class AddPointTest {
     @Test
     void sixGamesToSix_startsTieBreak() {
         startTieBreak();
-        Assertions.assertEquals(0, getTieBreakPoints(FIRST_PLAYER));
-        Assertions.assertEquals(0, getTieBreakPoints(SECOND_PLAYER));
+        Assertions.assertEquals("0", getPoints(FIRST_PLAYER));
+        Assertions.assertEquals("0", getPoints(SECOND_PLAYER));
     }
 
     @Test
@@ -157,18 +157,14 @@ public class AddPointTest {
     }
 
     private String getPoints(String name) {
-        return match.getPlayerScore(name).getPointsScore();
+        return match.getPlayerScore(name).points();
     }
 
     private int getGames(String name) {
-        return match.getPlayerScore(name).getGameScore();
+        return match.getPlayerScore(name).games();
     }
 
     private int getSets(String name) {
-        return match.getPlayerScore(name).getSetScore();
-    }
-
-    private int getTieBreakPoints(String name) {
-        return match.getPlayerScore(name).getTieBreakScore();
+        return match.getPlayerScore(name).sets();
     }
 }
