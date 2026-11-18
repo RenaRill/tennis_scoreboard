@@ -31,7 +31,7 @@ public class MatchController {
     @GetMapping
     public ResponseEntity<GetCompletedMatchesResponseDTO> getMatches(
             @RequestParam(name = "page", defaultValue = "1") @Min(1) int page,
-            @RequestParam(name = "name", required = false) String name) {
+            @RequestParam(name = "player_name", required = false) String name) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 completedMatchesService.getMatches(page, name)
         );
