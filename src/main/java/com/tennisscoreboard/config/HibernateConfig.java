@@ -16,6 +16,10 @@ import java.util.Properties;
 
 @Configuration
 @PropertySource("classpath:hibernate.properties")
+@PropertySource(
+        value = "file:${app.config:}/hibernate.properties",
+        ignoreResourceNotFound = true
+)
 @EnableTransactionManagement
 public class HibernateConfig {
     private final Environment env;
@@ -57,6 +61,10 @@ public class HibernateConfig {
 
     private Properties hibernateProperties() {
         Properties properties = new Properties();
+        properties.put(
+                "hibernate.hbm2ddl.auto",
+                env.getProperty("hibernate.hbm2ddl.auto", "validate")
+        );
         properties.put("hibernate.dialect", env.getRequiredProperty("hibernate.dialect"));
         properties.put("hibernate.show_sql", env.getRequiredProperty("hibernate.show_sql"));
 
